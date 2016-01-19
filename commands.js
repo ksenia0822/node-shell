@@ -46,7 +46,6 @@ exports.head = function(file) {
 	  			var count = 1;
 	  			data = data.toString();
 
-	  			// var head = '';
 	  			var slicePosition = 0;
 
 	  			for(var i = 0; i < data.length; i++) {
@@ -57,18 +56,12 @@ exports.head = function(file) {
 	  					slicePosition = i;
 	  					break;
 	  				}
-	  				//console.log(count)
 	  			}
 
 	  			var outputString = data.slice(0,slicePosition);
-	  			// if(count === 5) {
-	  				//process.stdout.write('\nprompt > ');
 	  				process.stdout.write(outputString);
 				  	process.stdout.write('\nprompt > ');
-	  			// }
-
 				});
-
 }
 
 exports.tail = function(file) {
@@ -96,8 +89,34 @@ exports.tail = function(file) {
 }
 
 
+exports.wc = function(file) {
+	fs.readFile(file, 'utf8', (err, data) => {
+		if (err) throw err;
+		var count = 1;
+		data = data.toString();
+		for(var i = 0; i < data.length; i++) {
+			if(data[i] === '\n') {
+				count++;
+			}
+		}
 
+		process.stdout.write(count.toString());
+	process.stdout.write('\nprompt > ');
+	});
+}
 
+exports.sort = function(file) {
+	fs.readFile(file, 'utf8', (err, data) => {
+		if (err) throw err;
+		data = data.toString();
+		
+		var dataArr = data.split('\n');
+		var outputString = dataArr.sort().join('\n');
+
+		process.stdout.write(outputString);
+		process.stdout.write('\nprompt > ');
+	});
+}
 
 
 
