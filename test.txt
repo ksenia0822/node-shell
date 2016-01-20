@@ -1,3 +1,4 @@
+//line
 line10
 line2
 line23
@@ -6,4 +7,5 @@ line5
 line45
 line7
 aline5
+line10
 //line
