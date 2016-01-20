@@ -18,19 +18,26 @@ process.stdin.on('data', function(data) {
 
   var command = splitData[0];
   var file = splitData[1]; 
+  var stringToMatch = (splitData[4] || "");
 
-  var secondCommand = splitByPipe[1]; 
+  var secondCommand = (splitByPipe[1] || "");
   //console.log("1",splitData[0],"2",splitData[1],"3",splitByPipe[1]);
   commands[command](undefined, file, done);
 
+  console.log("command",command,"file",file,"strToMatch",stringToMatch,"secondCommand",secondCommand);
+
   function done(output) {
-  	if(secondCommand) {
+    if (secondCommand.indexOf("grep") > -1) {
+      secondCommand = "";
+      commands.grep(output, stringToMatch, done);     
+    }
+  	else if(secondCommand) {
   		var n = secondCommand;
   		secondCommand = undefined;
   		commands[n](output, undefined, done);
   	} else {
   		process.stdout.write(output);
-		process.stdout.write('\nprompt > '); 
+  	 	process.stdout.write('\nprompt > '); 
   	}
 
 }

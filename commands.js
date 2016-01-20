@@ -95,9 +95,15 @@ exports.head = function(stdin,file,done) {
 	}
 }
 
+
+
 exports.tail = function(stdin,file,done) {
+
+	if(file) {
 	fs.readFile(file, 'utf8', (err, data) => {
+				
 	  			if (err) throw err;
+	  			
 	  			var count = 1;
 	  			data = data.toString();
 	  			var slicePosition = 0;
@@ -114,45 +120,97 @@ exports.tail = function(stdin,file,done) {
 
 	  			var outputString = ''
 	  			outputString += data.slice(slicePosition);
-	  			bash.done(outputString);
+	  			done(outputString);
 				});
+	}
+
+	else {
+	// if no file - stdin
+		var count = 1;
+		stdin = stdin.toString();
+		var slicePosition = 0;
+
+		for(var i = stdin.length; i > 0; i--) {
+			if(stdin[i] === '\n') {
+				count++;
+			}
+			if(count === 6) {
+				slicePosition = i+1;
+				break;
+			}
+		}
+
+		var outputString = ''
+		outputString += stdin.slice(slicePosition);
+		done(outputString);
+	 }
 }
 
 
 exports.wc = function(stdin,file,done) {
-	fs.readFile(file, 'utf8', (err, data) => {
-		if (err) throw err;
+
+	if(file) {
+		fs.readFile(file, 'utf8', (err, data) => {
+			if (err) throw err;
+			var count = 1;
+			data = data.toString();
+			for(var i = 0; i < data.length; i++) {
+				if(data[i] === '\n') {
+					count++;
+				}
+			}
+
+			done(count.toString());
+		});
+	}
+	else {
 		var count = 1;
-		data = data.toString();
-		for(var i = 0; i < data.length; i++) {
-			if(data[i] === '\n') {
+		stdin = stdin.toString();
+		for(var i = 0; i < stdin.length; i++) {
+			if(stdin[i] === '\n') {
 				count++;
 			}
 		}
 
-		bash.done(count.toString());
-	});
+		done(count.toString());
+	}
 }
 
 exports.sort = function(stdin,file,done) {
-	fs.readFile(file, 'utf8', (err, data) => {
-		if (err) throw err;
-		data = data.toString();
+	if(file) {
+		fs.readFile(file, 'utf8', (err, data) => {
+			if (err) throw err;
+			data = data.toString();
+			
+			var dataArr = data.split('\n');
+			var outputString = dataArr.sort().join('\n');
+
+			done(outputString);
+
+		});
+	}
+	else {
+
+		stdin = stdin.toString();
 		
-		var dataArr = data.split('\n');
+		var dataArr = stdin.split('\n');
 		var outputString = dataArr.sort().join('\n');
 
-		bash.done(outputString);
-
-	});
+		done(outputString);
+	}
 }
 
+
+
+
 exports.uniq = function(stdin,file,done) {
-	fs.readFile(file, 'utf8', (err, data) => {
-		if (err) throw err;
-		data = data.toString();
+
+	/* uniq refactor */
+
+	function uniqrefactor(input) {
+		input = input.toString();
 		
-		var dataArr = data.split('\n').sort();
+		var dataArr = input.split('\n').sort();
 
 		for(var i = 0; i < dataArr.length; i++) {
 	    	if(dataArr[i] === dataArr[i+1]) {
@@ -163,16 +221,67 @@ exports.uniq = function(stdin,file,done) {
 
 		var outputString = dataArr.join('\n');
 
+		done(outputString);
 
-		bash.done(outputString);
-	});
+	}
+	
+	if(file) {
+		fs.readFile(file, 'utf8', (err, data) => {
+			if (err) throw err;
 
+			uniqrefactor(data);
+			// data = data.toString();
+			
+			// var dataArr = data.split('\n').sort();
+
+			// for(var i = 0; i < dataArr.length; i++) {
+		 //    	if(dataArr[i] === dataArr[i+1]) {
+		 //        	dataArr = dataArr.slice(0, i).concat(dataArr.slice(i+1));
+		 //    	}
+		
+			// }
+
+			// var outputString = dataArr.join('\n');
+
+			// done(outputString);
+		});
+	}
+	else {
+		uniqrefactor(stdin);
+		// stdin = stdin.toString();
+		
+		// var dataArr = stdin.split('\n').sort();
+
+		// for(var i = 0; i < dataArr.length; i++) {
+	 //    	if(dataArr[i] === dataArr[i+1]) {
+	 //        	dataArr = dataArr.slice(0, i).concat(dataArr.slice(i+1));
+	 //    	}
+	
+		// }
+
+		// var outputString = dataArr.join('\n');
+
+		// done(outputString);
+	}
+}
+
+exports.grep = function(stdin,stringToMatch,done) {
+//	console.log(stringToMatch);
+	stdin = stdin.toString();
+	
+	var dataArr = stdin.split('\n');
+	var outputString = "";
+	for(var i = 0; i < dataArr.length; i++) {
+		if(dataArr[i].indexOf(stringToMatch) > -1) {
+			outputString += dataArr[i];
+			outputString += "\n";
+		}
+	}
+	
+	done(outputString);
 }
 
 
-/*
-Now that you have request available to require, implement the curl command. It should make an HTTP GET request to a given URL, and print out the HTTP response body.
-*/
 
 exports.curl = function(webAddress) {
 	request(webAddress, function (error, response, body) {
