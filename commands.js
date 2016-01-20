@@ -29,7 +29,12 @@ exports.ls = function(stdin,file,done) {
 };
 
 exports.echo = function(stdin,file,done) {
-	done(file);
+	if(file) {
+		done(file);
+	} else {
+		done(stdin);
+	}
+	
 }
 
 exports.cat = function(stdin,file,done) {
